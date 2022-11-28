@@ -1,7 +1,7 @@
 package concurrent
 
 import (
-	"fmt"
+	"sync"
 	"sync/atomic"
 	"unsafe"
 )
@@ -15,7 +15,6 @@ type DEQueue interface {
 	PopTop() Task
 	PopBottom() Task
 	Size() int
-	Show()
 }
 
 /******** DO NOT MODIFY ANY OF THE ABOVE INTERFACES/TYPES *********************/
@@ -42,6 +41,7 @@ type UnBoundedDEQueue struct {
 	head *Node // bottom part of the queue
 	tail *Node // top part of the queue
 	size int64
+	lock *sync.Mutex
 }
 
 // Visualized representation of the queue
@@ -53,11 +53,16 @@ func NewUnBoundedDEQueue() DEQueue {
 		head: nil,
 		tail: nil,
 		size: 0,
+		lock: &sync.Mutex{},
 	}
 }
 
 // PushBottom adds a task to the bottom of the queue
 func (q *UnBoundedDEQueue) PushBottom(task Task) {
+	// Lock the queue and unlock it when the function returns
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
 	// Create a new node
 	node := newNode(task)
 	// Increase the size of the queue
@@ -79,6 +84,10 @@ func (q *UnBoundedDEQueue) PushBottom(task Task) {
 
 // PopBottom removes a task from the bottom of the queue
 func (q *UnBoundedDEQueue) PopBottom() Task {
+	// Lock the queue and unlock it when the function returns
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
 	// Check if the queue is empty
 	if q.head == nil {
 		return nil
@@ -110,6 +119,10 @@ func (q *UnBoundedDEQueue) PopBottom() Task {
 
 // PopTop removes a task from the top of the queue
 func (q *UnBoundedDEQueue) PopTop() Task {
+	// Lock the queue and unlock it when the function returns
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
 	// Check if the queue is empty
 	if q.tail == nil {
 		return nil
@@ -140,22 +153,14 @@ func (q *UnBoundedDEQueue) PopTop() Task {
 
 // IsEmpty returns whether the queue is empty
 func (q *UnBoundedDEQueue) IsEmpty() bool {
-	if q.head == nil && q.tail == nil {
-		return true
-	}
-	return false
+	// Lock the queue and unlock it when the function returns
+	q.lock.Lock()
+	defer q.lock.Unlock()
+
+	return q.head == nil && q.tail == nil
 }
 
 // Size returns the size of the queue
 func (q *UnBoundedDEQueue) Size() int {
 	return int(atomic.LoadInt64(&q.size))
-}
-
-// Show the queue
-func (q *UnBoundedDEQueue) Show() {
-	node := q.head
-	for node != nil {
-		fmt.Println(node.task)
-		node = (*Node)(node.prev)
-	}
 }
