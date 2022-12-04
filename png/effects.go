@@ -18,6 +18,8 @@ func (img *Image) ApplyEffect(effect string, startY, endY int) {
 		img.Blur(startY, endY)
 	case "E":
 		img.EdgeDetect(startY, endY)
+	case "M":
+		img.Emboss(startY, endY)
 	default:
 		panic("Invalid effect")
 	}
@@ -81,6 +83,19 @@ func (img *Image) EdgeDetect(startY, endY int) {
 		{-1, -1, -1},
 		{-1, 8, -1},
 		{-1, -1, -1},
+	}
+
+	// Apply the kernel
+	conv2D(img, kernel, startY, endY)
+}
+
+// Emboss filter
+func (img *Image) Emboss(startY, endY int) {
+	// Emboss kernel
+	kernel := [][]float64{
+		{-1, -1, 0},
+		{-1, 0, 1},
+		{0, 1, 1},
 	}
 
 	// Apply the kernel
