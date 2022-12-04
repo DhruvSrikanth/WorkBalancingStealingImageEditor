@@ -41,7 +41,7 @@ type UnBoundedDEQueue struct {
 	head *Node // bottom part of the queue
 	tail *Node // top part of the queue
 	size int64
-	lock *sync.Mutex
+	lock *sync.Mutex // Lock for the queue that is used by the executor
 }
 
 // Visualized representation of the queue
@@ -59,14 +59,16 @@ func NewUnBoundedDEQueue() DEQueue {
 
 // PushBottom adds a task to the bottom of the queue
 func (q *UnBoundedDEQueue) PushBottom(task Task) {
-	// Lock the queue and unlock it when the function returns
+	// Lock the queue and defer the unlock
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
 	// Create a new node
 	node := newNode(task)
+
 	// Increase the size of the queue
-	atomic.AddInt64(&q.size, 1)
+	q.size += 1
+
 	// Check if the queue is empty
 	if q.head == nil {
 		// Set the head and tail to the new node
@@ -84,17 +86,17 @@ func (q *UnBoundedDEQueue) PushBottom(task Task) {
 
 // PopBottom removes a task from the bottom of the queue
 func (q *UnBoundedDEQueue) PopBottom() Task {
-	// Lock the queue and unlock it when the function returns
+	// Lock the queue and defer the unlock
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
 	// Check if the queue is empty
-	if q.head == nil {
+	if q.size == 0 {
 		return nil
 	}
 
 	// Decrease the size of the queue
-	atomic.AddInt64(&q.size, -1)
+	q.size -= 1
 
 	// Check if the queue has only one element
 	if q.head == q.tail {
@@ -119,17 +121,17 @@ func (q *UnBoundedDEQueue) PopBottom() Task {
 
 // PopTop removes a task from the top of the queue
 func (q *UnBoundedDEQueue) PopTop() Task {
-	// Lock the queue and unlock it when the function returns
+	// Lock the queue and defer the unlock
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
 	// Check if the queue is empty
-	if q.tail == nil {
+	if q.size == 0 {
 		return nil
 	}
 
 	// Decrease the size of the queue
-	atomic.AddInt64(&q.size, -1)
+	q.size -= 1
 
 	// Check if the queue has only one element
 	if q.head == q.tail {
@@ -153,11 +155,11 @@ func (q *UnBoundedDEQueue) PopTop() Task {
 
 // IsEmpty returns whether the queue is empty
 func (q *UnBoundedDEQueue) IsEmpty() bool {
-	// Lock the queue and unlock it when the function returns
+	// Lock the queue and defer the unlock
 	q.lock.Lock()
 	defer q.lock.Unlock()
 
-	return q.head == nil && q.tail == nil
+	return q.size == 0
 }
 
 // Size returns the size of the queue
