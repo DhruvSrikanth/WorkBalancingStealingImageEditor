@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Shared Context for Work Balancing
 type sharedContextWB struct {
 	capacity         int
 	thresholdQueue   int
@@ -13,6 +14,8 @@ type sharedContextWB struct {
 	queues           []DEQueue
 	wg               *sync.WaitGroup
 }
+
+// Work Balancing Balancer
 type balancer struct {
 	workers         []*workerWB
 	done            bool
@@ -20,6 +23,7 @@ type balancer struct {
 	context         *sharedContextWB
 }
 
+// Work Balancing Worker
 type workerWB struct {
 	id            int
 	context       *sharedContextWB
@@ -27,6 +31,7 @@ type workerWB struct {
 	workRemaining bool
 }
 
+// Returns a new Work Balancing Balancer
 func NewWorkerWB(id int, context *sharedContextWB) *workerWB {
 	return &workerWB{
 		id:            id,
@@ -36,6 +41,7 @@ func NewWorkerWB(id int, context *sharedContextWB) *workerWB {
 	}
 }
 
+// Check if all queues are empty
 func (worker *workerWB) isWorkPoolEmpty() bool {
 	// Check if all queues are empty
 	for _, queue := range worker.context.queues {
@@ -46,6 +52,7 @@ func (worker *workerWB) isWorkPoolEmpty() bool {
 	return true
 }
 
+// Get a random victim
 func (worker *workerWB) getVictim() int {
 	// Get random victim
 	victim := worker.randGen.Intn(worker.context.capacity)
@@ -57,16 +64,18 @@ func (worker *workerWB) getVictim() int {
 	return victim
 }
 
+// Balance policy - returns true if the queues need to be balanced based on the balancing threshold provided
 func balancePolicy(smallQueue, largeQueue DEQueue, lambda int) bool {
 	// Check if the queues need to be balanced
 	return largeQueue.Size()-smallQueue.Size() >= lambda
 }
 
+// Balance two queues
 func (worker *workerWB) balance() {
 	// Get the victim to balance with
 	victim := worker.getVictim()
 
-	// Canonical ordering of victim and worker
+	// Ordering of victim and worker
 	var min int
 	var max int
 	if victim < worker.id {
@@ -77,6 +86,7 @@ func (worker *workerWB) balance() {
 		max = victim
 	}
 
+	// Determine which queue is smaller and which is larger
 	var smallQueue DEQueue
 	var largeQueue DEQueue
 
@@ -101,8 +111,9 @@ func (worker *workerWB) balance() {
 	}
 }
 
+// Worker routine
 func (worker *workerWB) work() {
-	// Worker loops if work is remaining in its own queue or the overall work pool
+	// Worker loops if work is remaining in the overall work pool and if worker's local queue is not empty
 	for worker.workRemaining || !worker.isWorkPoolEmpty() {
 		// Get the next task
 		workerTask := worker.context.queues[worker.id].PopTop()
@@ -115,9 +126,10 @@ func (worker *workerWB) work() {
 		}
 
 		// Rebalancing is only done if there is more than one worker
-		// and at random
+		// and at random (i.e. 1/n chance where n is the size of the queue)
 		queueSize := worker.context.queues[worker.id].Size()
 		if worker.context.capacity > 1 && queueSize == worker.randGen.Intn(queueSize+1) {
+			// Balance the queues
 			worker.balance()
 		}
 	}
@@ -177,12 +189,14 @@ func NewWorkBalancingExecutor(capacity, thresholdQueue, thresholdBalance int) Ex
 	return service
 }
 
+// Get the next worker idx to distribute work to
 func (service *balancer) nextDistributee() int {
 	// Get next distributee and update prevDistributee
 	service.prevDistributee = (service.prevDistributee + 1) % service.context.capacity
 	return service.prevDistributee
 }
 
+// Submit a task to the executor
 func (service *balancer) Submit(task interface{}) Future {
 	// Check if service is done
 	if service.done {
@@ -194,16 +208,21 @@ func (service *balancer) Submit(task interface{}) Future {
 
 	// Add task to distributee's queue
 	service.context.queues[distributee].PushBottom(task)
+
 	// Type assertion
 	return task.(Future)
 }
 
+// Shutdown the executor
 func (service *balancer) Shutdown() {
-	// Indicate the service is done
+	// Indicate the service is done for all workers
 	for _, worker := range service.workers {
 		worker.workRemaining = false
 	}
+
+	// Indicate the service is done
 	service.done = true
+
 	// Wait for all workers to finish
 	service.context.wg.Wait()
 }

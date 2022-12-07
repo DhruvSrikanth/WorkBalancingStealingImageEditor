@@ -6,12 +6,14 @@ import (
 	"time"
 )
 
+// Shared Context for Work Stealing
 type sharedContextST struct {
 	capacity int
 	queues   []DEQueue
 	wg       *sync.WaitGroup
 }
 
+// Work Stealing Stealer
 type stealer struct {
 	workers         []*workerST
 	done            bool
@@ -19,32 +21,36 @@ type stealer struct {
 	context         *sharedContextST
 }
 
+// Work Stealing Worker
 type workerST struct {
-	id              int
-	context         *sharedContextST
-	randGen         *rand.Rand
-	workRemaining   bool
-	stealingOptions []int
+	id            int
+	context       *sharedContextST
+	randGen       *rand.Rand
+	workRemaining bool
+	victimOptions []int
 }
 
+// Returns a new Work Stealing Stealer
 func NewWorkerST(id int, context *sharedContextST) *workerST {
 	// Add the appropriate stealing options
 	victims := []int{}
 	for i := 0; i < context.capacity; i++ {
+		// Worker cant steal from itself
 		if i != id {
 			victims = append(victims, i)
 		}
 	}
 
 	return &workerST{
-		id:              id,
-		context:         context,
-		randGen:         rand.New(rand.NewSource(time.Now().UnixNano())),
-		workRemaining:   true,
-		stealingOptions: victims,
+		id:            id,
+		context:       context,
+		randGen:       rand.New(rand.NewSource(time.Now().UnixNano())),
+		workRemaining: true,
+		victimOptions: victims,
 	}
 }
 
+// Check if all queues are empty
 func (worker *workerST) isWorkPoolEmpty() bool {
 	// Check if all queues are empty
 	for _, queue := range worker.context.queues {
@@ -55,21 +61,23 @@ func (worker *workerST) isWorkPoolEmpty() bool {
 	return true
 }
 
+// Get a random victim
 func (worker *workerST) getVictim() int {
 	// Get random victim
-	victimIdx := worker.randGen.Intn(len(worker.stealingOptions))
+	victimIdx := worker.randGen.Intn(len(worker.victimOptions))
 	// Victim will not be the worker itself since we have removed it from the options
 	// Remove the victim from the options
-	victim := worker.stealingOptions[victimIdx]
-	worker.stealingOptions = append(worker.stealingOptions[:victimIdx], worker.stealingOptions[victimIdx+1:]...)
+	victim := worker.victimOptions[victimIdx]
+	worker.victimOptions = append(worker.victimOptions[:victimIdx], worker.victimOptions[victimIdx+1:]...)
 	return victim
 }
 
 func stealingPolicy(smallQueue, largeQueue DEQueue) bool {
-	// Check if the size of the smaller queue is 0 and the larger queue is not
+	// Check if the size of the smaller queue is 0 and the larger queue has at least 1 element
 	return smallQueue.IsEmpty() && !largeQueue.IsEmpty()
 }
 
+// Steal a task from the victim
 func (worker *workerST) steal() {
 	// Get the victim to balance with
 	victimIdx := worker.getVictim()
@@ -87,13 +95,14 @@ func (worker *workerST) steal() {
 			// Add all options back to the stealing options
 			for i := 0; i < worker.context.capacity; i++ {
 				if i != worker.id {
-					worker.stealingOptions = append(worker.stealingOptions, i)
+					worker.victimOptions = append(worker.victimOptions, i)
 				}
 			}
 		}
 	}
 }
 
+// Worker routine
 func (worker *workerST) work() {
 	// Worker loops if work is remaining in its own queue or the overall work pool
 	for worker.workRemaining || !worker.isWorkPoolEmpty() {
@@ -109,7 +118,7 @@ func (worker *workerST) work() {
 			workerTask = worker.context.queues[worker.id].PopTop()
 		}
 
-		if worker.context.capacity > 1 && len(worker.stealingOptions) > 0 {
+		if worker.context.capacity > 1 && len(worker.victimOptions) > 0 {
 			worker.steal()
 		}
 	}
@@ -126,7 +135,6 @@ func (worker *workerST) work() {
 // once to place into their local queue before grabbing more items. It's
 // not required that you use this parameter in your implementation.
 func NewWorkStealingExecutor(capacity, threshold int) ExecutorService {
-
 	// Create capacity queues
 	queues := []DEQueue{}
 	for i := 0; i < capacity; i++ {
@@ -164,12 +172,14 @@ func NewWorkStealingExecutor(capacity, threshold int) ExecutorService {
 	return service
 }
 
+// Get index of the next worker to distribute work to
 func (service *stealer) nextDistributee() int {
 	// Get next distributee and update prevDistributee
 	service.prevDistributee = (service.prevDistributee + 1) % service.context.capacity
 	return service.prevDistributee
 }
 
+// Submit a task to the executor
 func (service *stealer) Submit(task interface{}) Future {
 	// Check if service is done
 	if service.done {
@@ -183,12 +193,16 @@ func (service *stealer) Submit(task interface{}) Future {
 	return task.(Future)
 }
 
+// Shutdown the executor
 func (service *stealer) Shutdown() {
-	// Indicate the service is done
+	// Indicate no more work is remaining
 	for _, worker := range service.workers {
 		worker.workRemaining = false
 	}
+
+	// Indicate the service is done
 	service.done = true
+
 	// Wait for all workers to finish
 	service.context.wg.Wait()
 }

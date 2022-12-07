@@ -15,6 +15,9 @@ import (
 const usage = "Usage: go run conjugate_reduce.go <imageHeight> <nThreads\n  <image_height> = number of grid points in each dimension\n<imageHeight> = number of threads to use for parallelization\n"
 
 func main() {
+	// Flag set manually by user
+	benchmarking := true
+
 	if len(os.Args) < 2 {
 		fmt.Println(usage)
 		return
@@ -35,15 +38,21 @@ func main() {
 	}
 
 	context := vector.MapReduceContext{
-		NThreads: nThreads,
-		WG:       &sync.WaitGroup{},
+		NThreads:     nThreads,
+		MapWG:        &sync.WaitGroup{},
+		ReduceWG:     &sync.WaitGroup{},
+		Benchmarking: benchmarking,
 	}
 
 	N := n * n
 
-	fmt.Println("Simulation Parameters:")
-	fmt.Println("n = ", n)
-
+	if !benchmarking {
+		fmt.Println("Simulation Parameters:")
+		fmt.Println("n =", n)
+		if nThreads > 0 {
+			fmt.Println("Number of threads =", nThreads)
+		}
+	}
 	// Start timer
 	s := time.Now()
 
@@ -59,12 +68,18 @@ func main() {
 	// Stop timer
 	e := time.Now()
 
-	// Write RHS to file
-	utils.WriteToFile(&b, "./output/b.txt", 0, N)
+	if !benchmarking {
+		// Write RHS to file
+		utils.WriteToFile(&b, "./output/b.txt", 0, N)
 
-	// Write solution to file
-	utils.WriteToFile(&x, "./output/x.txt", N, N)
+		// Write solution to file
+		utils.WriteToFile(&x, "./output/x.txt", N, N)
+	}
 
 	// Print time taken
-	fmt.Println("Time taken = ", e.Sub(s).Seconds(), " seconds")
+	if !benchmarking {
+		fmt.Println("Time taken =", e.Sub(s).Seconds(), "seconds")
+	} else {
+		fmt.Println(e.Sub(s).Seconds())
+	}
 }

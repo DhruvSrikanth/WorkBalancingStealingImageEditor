@@ -52,7 +52,9 @@ func ConjugateGradient(b, x *[]float64, n int, context *vector.MapReduceContext)
 
 		// If the residual is small enough, stop
 		if math.Sqrt(rsnew) <= tol {
-			fmt.Printf("Converged after %d iterations\n", i)
+			if !context.Benchmarking {
+				fmt.Printf("Converged after %d iterations\n", i)
+			}
 			break
 		}
 
@@ -62,8 +64,8 @@ func ConjugateGradient(b, x *[]float64, n int, context *vector.MapReduceContext)
 		// rsold = rsnew
 		rsold = rsnew
 
-		// Save x every 10 iterations
-		if i%10 == 0 {
+		// Write to file every 10 iterations
+		if i%10 == 0 && !context.Benchmarking {
 			outPath := fmt.Sprintf("./output/x_%d.txt", i)
 			utils.WriteToFile(x, outPath, i, N)
 		}
