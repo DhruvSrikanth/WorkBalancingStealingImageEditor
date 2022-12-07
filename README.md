@@ -201,3 +201,55 @@ The following observations can be made from the **work stealing** mode graph -
 
 4. Compare and contrast the two parallel implementations. Are there differences in their speedups?
 
+
+### Advanced Feature - MapReduce - 
+
+**In the `conjugate_gradient/simulator/simulator.go` file, make sure to change the `benchmarking` flag to `true` when benchmarking and `false` when using application normally.** This flag ensures that no extra print statements are made during benchmarking.
+
+I have implemented the MapReduce feature for different project (not the image editor). This project is the **Sparse Matrix Solver using the Conjugate Gradient method**. All code can be found within the `conjugate_gradient` directory inside the main project directory.
+
+#### Project Description and Motivation - 
+
+
+#### Important System Components - 
+
+
+#### Running the Program - 
+
+#### Benchmarking - 
+
+**In the `conjugate_gradient/simulator/simulator.go` file, make sure to change the `benchmarking` flag to `true` when benchmarking and `false` when using application normally.**
+
+**All testing has been carried out on the CS linux cluster i.e. the Peanut Cluster.**
+
+Peanut Cluster specifications - 
+    
+1. Core architecture - Intel x86_64
+
+2. Model name - Intel(R) Xeon(R) CPU E5-2420 0 @ 1.90GHz
+
+3. Number of threads - 24
+
+4. Operating system - ubuntu
+
+5. OS version - 20.04.4 LTS
+
+The program can be benchmarked using the following command - 
+
+```console
+foo@bar:~$ sbatch benchmark_cg.sh
+```
+
+This must be run within the `conjugate_gradient/benchmark directory`. Make sure to create the `slurm/out` directory inside `conjugate_gradient/benchmark` directory and check the `.stdout` file for the outputs and the timings. 
+
+The graph of speedups for the MapReduce feature can be seen below - 
+
+![benchmark_cg](./conjugate_gradient/benchmark/MapReduce-speedup.png)
+
+
+The graphs will be created within the `conjugate_gradient/benchmark` directory. The computation of the speedups along with the storing of each of the benchmarking timings and the plotting of the stored data happens by using `conjugate_gradient/benchmark_graph.py` which is called from within `conjugate_gradient/benchmark_cg.sh` (both reside in the `conjugate_gradient/benchmark` directory).
+
+
+The following observations can be made from the **MapReduce** mode graph - 
+
+1. 
