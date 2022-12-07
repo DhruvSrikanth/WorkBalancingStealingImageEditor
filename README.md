@@ -109,14 +109,14 @@ The editor can be run in the following way -
 
 The first step to run any of the following modes is - 
 
-```console
+```shell
 foo@bar:~$ cd editor
 ```
 
 
 1. Sequential run - 
 
-    ```console
+    ```shell
     foo@bar:~$ go run editor.go <image directory>
     ```
 
@@ -124,13 +124,13 @@ foo@bar:~$ cd editor
 
     1. Work Balancing - 
 
-        ```console
+        ```shell
         foo@bar:~$ go run editor.go <image directory> wb <number of threads to be spawned> <balancing threshold>
         ```
 
     2. Work Stealing - 
 
-        ```console
+        ```shell
         foo@bar:~$ go run editor.go <image directory> ws <number of threads to be spawned>
         ```
 
@@ -138,7 +138,7 @@ foo@bar:~$ cd editor
 
 If there a images in multiple directories within `data/in`, for example, if there was the directories `small` and `big`, we can chain directories to process using `+` - 
 
-    ```console
+    ```shell
     foo@bar:~$ go run editor.go small+big ws <number of threads to be spawned>
     ```
 
@@ -163,7 +163,7 @@ Peanut Cluster specifications -
 
 The program can be benchmarked using the following command - 
 
-```console
+```shell
 foo@bar:~$ sbatch benchmark_editor.sh
 ```
 
