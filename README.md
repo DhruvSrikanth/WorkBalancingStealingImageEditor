@@ -116,31 +116,31 @@ foo@bar:~$ cd editor
 
 1. Sequential run - 
 
-```console
-foo@bar:~$ go run editor.go <image directory>
-```
+    ```console
+    foo@bar:~$ go run editor.go <image directory>
+    ```
 
 2. Parallel runs - 
 
     1. Work Balancing - 
 
-    ```console
-    foo@bar:~$ go run editor.go <image directory> wb <number of threads to be spawned> <balancing threshold>
-    ```
+        ```console
+        foo@bar:~$ go run editor.go <image directory> wb <number of threads to be spawned> <balancing threshold>
+        ```
 
     2. Work Stealing - 
 
-    ```console
-    foo@bar:~$ go run editor.go <image directory> ws <number of threads to be spawned>
-    ```
+        ```console
+        foo@bar:~$ go run editor.go <image directory> ws <number of threads to be spawned>
+        ```
 
 3. Multiple Input Image Directories - 
 
 If there a images in multiple directories within `data/in`, for example, if there was the directories `small` and `big`, we can chain directories to process using `+` - 
 
-```console
-foo@bar:~$ go run editor.go small+big ws <number of threads to be spawned>
-```
+    ```console
+    foo@bar:~$ go run editor.go small+big ws <number of threads to be spawned>
+    ```
 
 
 ### Benchmarking the Program - 
