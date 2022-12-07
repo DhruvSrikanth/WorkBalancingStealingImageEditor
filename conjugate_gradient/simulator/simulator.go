@@ -16,7 +16,7 @@ const usage = "Usage: go run conjugate_reduce.go <imageHeight> <nThreads\n  <ima
 
 func main() {
 	// Flag set manually by user
-	benchmarking := true
+	benchmarking := false
 
 	if len(os.Args) < 2 {
 		fmt.Println(usage)

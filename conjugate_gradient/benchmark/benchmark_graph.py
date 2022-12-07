@@ -93,11 +93,11 @@ def plot_speedups(num_threads, speedups, mode):
         mode: The mode of the benchmark.
     '''
     for problem_size in speedups:
-        plt.plot(num_threads, list(speedups[problem_size].values()), label=problem_size)
+        plt.plot(num_threads, list(speedups[problem_size].values()), label=f'{problem_size} data points')
 
     plt.xlabel('Number of threads')
     plt.ylabel('Speedup')
-    plt.title(f'Editor Speedup Graph ({mode})')
+    plt.title(f'Sparse Matrix Solver using Conjugate Gradient ({mode})')
     plt.legend(loc='best')
     plt.tight_layout()
     plt.grid()

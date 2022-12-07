@@ -5,7 +5,7 @@
 #SBATCH --job-name=proj3_benchmark_editor 
 #SBATCH --output=./slurm/out/%j.%N.stdout
 #SBATCH --error=./slurm/out/%j.%N.stderr
-#SBATCH --chdir=/home/dhruvsrikanth/temp/parallel_proj_3/project_3/proj3/benchmark
+#SBATCH --chdir=/home/dhruvsrikanth/temp/parallel_proj_3/project_3/benchmark
 #SBATCH --partition=debug 
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
