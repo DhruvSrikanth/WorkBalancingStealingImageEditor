@@ -124,15 +124,15 @@ foo@bar:~$ go run editor.go <image directory>
 
     1. Work Balancing - 
 
-```console
-foo@bar:~$ go run editor.go <image directory> wb <number of threads to be spawned> <balancing threshold>
-```
+    ```console
+    foo@bar:~$ go run editor.go <image directory> wb <number of threads to be spawned> <balancing threshold>
+    ```
 
     2. Work Stealing - 
 
-```console
-foo@bar:~$ go run editor.go <image directory> ws <number of threads to be spawned>
-```
+    ```console
+    foo@bar:~$ go run editor.go <image directory> ws <number of threads to be spawned>
+    ```
 
 3. Multiple Input Image Directories - 
 
