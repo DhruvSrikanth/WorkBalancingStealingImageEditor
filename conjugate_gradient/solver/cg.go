@@ -8,7 +8,7 @@ import (
 	"proj3/conjugate_gradient/vector"
 )
 
-func ConjugateGradient(b, x *[]float64, n int) {
+func ConjugateGradient(b, x *[]float64, n int, context *vector.MapReduceContext) {
 	// Initialize variables
 	N := n * n
 
@@ -32,14 +32,14 @@ func ConjugateGradient(b, x *[]float64, n int) {
 	}
 
 	// rsold = rT * r
-	rsold := vector.DotP(&r, &r, N)
+	rsold := vector.DotPWrapper(&r, &r, N, context)
 
 	for i := 0; i < N; i++ {
 		// z = A*p
 		poisson.PoissonOnTheFly(&z, &p, N)
 
 		// alpha = rsold / (p*z)
-		alpha := rsold / vector.DotP(&p, &z, N)
+		alpha := rsold / vector.DotPWrapper(&p, &z, N, context)
 
 		// x = x + alpha*p
 		vector.Axpy(x, 1.0, x, alpha, &p, N)
@@ -48,7 +48,7 @@ func ConjugateGradient(b, x *[]float64, n int) {
 		vector.Axpy(&r, 1.0, &r, -alpha, &z, N)
 
 		// rsnew = rT*r
-		rsnew := vector.DotP(&r, &r, N)
+		rsnew := vector.DotPWrapper(&r, &r, N, context)
 
 		// If the residual is small enough, stop
 		if math.Sqrt(rsnew) <= tol {
