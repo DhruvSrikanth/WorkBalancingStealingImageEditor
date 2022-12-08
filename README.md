@@ -23,9 +23,9 @@ The editor processes image tasks specified in three different ways i.e. sequenti
     - **I/O takes places in the `data` directory. If there is no `data` directory, you can create one using `mkdir data` while inside the project directory.**
     - Each editor task is provided within the directory `data/effects.txt` file. An example of an editor task is shown below (multiple tasks can be specified by placing one on each line of the `effects.txt` file and are in the `JSON format` - 
 
-        ```JSON
-        {"inPath": "IMG_2029.png", "outPath": "IMG_2029_Out.png", "effects": ["G","E","S","B","M"]}
-        ``` 
+    ```JSON
+    {"inPath": "IMG_2029.png", "outPath": "IMG_2029_Out.png", "effects": ["G","E","S","B","M"]}
+    ``` 
     
     - Input images must be provided within the a directory inside `data/in` directory. If one does not exist, you can create it from within `data` using `mkdir in`. Similarly for the directory. For example, to process an image, we can create  `data/in/small` and place the image inside this directory.  
 
