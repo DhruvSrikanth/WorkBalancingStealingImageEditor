@@ -8,6 +8,8 @@ In the project specifications, it is mentioned that all files provided to us are
 
 The advanced feature utilizing MapReduce can be found within the `conjugate_gradient` directory. This is a completely separate application. The report for this can be found within the **Advanced Feature** section of this README. I'd like to thank Umang Bhatia for brainstorming ideas with me for the advanced feature project. The conjugate gradient sparse matrix solver was a project I previously did in `C++`, `OpenMP` and `MPI`. The motivation behind reimplementing this in `Go` was to explore how `MPI_Allreduce`, which I used in my previous implementation, can be implemented in `Go`.
 
+**Important Note 3** -
+I have added an extra effect that was not present in the `proj2` image editor called `Emboss`. 
 
 ### Project Description and Motivation - 
 
@@ -23,9 +25,9 @@ The editor processes image tasks specified in three different ways i.e. sequenti
     - **I/O takes places in the `data` directory. If there is no `data` directory, you can create one using `mkdir data` while inside the project directory.**
     - Each editor task is provided within the directory `data/effects.txt` file. An example of an editor task is shown below (multiple tasks can be specified by placing one on each line of the `effects.txt` file and are in the `JSON format` - 
 
-    ```JSON
-    {"inPath": "IMG_2029.png", "outPath": "IMG_2029_Out.png", "effects": ["G","E","S","B","M"]}
-    ``` 
+        ```JSON
+        {"inPath": "IMG_2029.png", "outPath": "IMG_2029_Out.png", "effects": ["G","E","S","B","M"]}
+        ``` 
     
     - Input images must be provided within the a directory inside `data/in` directory. If one does not exist, you can create it from within `data` using `mkdir in`. Similarly for the directory. For example, to process an image, we can create  `data/in/small` and place the image inside this directory.  
 
@@ -90,7 +92,8 @@ The editor processes image tasks specified in three different ways i.e. sequenti
 
 
     - **Note that these identifiers for each effect are case sensitive.**
-    - Convolution is perform on a 2D image grid by convolving the kernel across the image. The convolution operation can be thought of as a sliding window computation over the entire image. The computation being performed is the frobenius inner product which is the sum over element wise products between the kernel and patch of image overlapping with the kernel. **Zero padding** is used at the edges of the image. The convolution operation can be seen below - 
+
+    - Convolution is performed on a 2D image grid by convolving the kernel across the image. The convolution operation can be thought of as a sliding window computation over the entire image. The computation being performed is the frobenius inner product which is the sum over element wise products between the kernel and patch of image overlapping with the kernel. **Zero padding** is used at the edges of the image. The convolution operation can be seen below - 
 
         $$y[m,n] = x[m,n] \ast h[m,n] = \sum_{j=-\infty}^{\infty} \sum_{i=-\infty}^{\infty} x[i,j] h[m - i, n - j]$$
 
