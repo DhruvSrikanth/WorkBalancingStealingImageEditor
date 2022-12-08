@@ -13,6 +13,7 @@ I have added an extra effect that was not present in the `proj2` image editor ca
 
 **Important Note 4** -
 When benchmarking, be sure to change the benchmark scripts provided with the appropriate paths.
+
 ### Project Description and Motivation - 
 
 This project is an implementation of an image editor. The motivation behind this project is to improve the compute time taken by image editors. In a digital world, appearances online have become so important, from Zoom meeting filters to liven a call, to Instagram pages to promote products. With the increase in the ubiquity of multi-core machines, parallel computing offers a new paradigm of programming that can take advantage of more compute power to drastically decrease the wait time to produce images that may just brighten someone's day.
